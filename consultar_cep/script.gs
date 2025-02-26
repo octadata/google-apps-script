@@ -21,8 +21,9 @@ function CONSULTAR_CEP(cep, itens) {
   var cachedData = cache.get(cep);
 
   // Se o dado estiver em cache, reutiliza o resultado
+  var data;
   if (cachedData) {
-    var data = JSON.parse(cachedData);
+    data = JSON.parse(cachedData);
   } else {
     var url = 'https://brasilapi.com.br/api/cep/v2/' + cep;
     var response;
@@ -32,9 +33,7 @@ function CONSULTAR_CEP(cep, itens) {
     // Faz até 10 tentativas para obter uma resposta com status HTTP 200
     while (attempts < 10 && !success) {
       try {
-        // Faz a requisição para a API do BrasilAPI
         response = UrlFetchApp.fetch(url);
-        // Verifica se o status da resposta é 200
         if (response.getResponseCode() === 200) {
           success = true;
         } else {
@@ -50,7 +49,7 @@ function CONSULTAR_CEP(cep, itens) {
     if (!success) {
       return "Erro";
     }
-    
+
     data = JSON.parse(response.getContentText());
 
     if (!data.cep) {
@@ -61,22 +60,30 @@ function CONSULTAR_CEP(cep, itens) {
     cache.put(cep, JSON.stringify(data), 21600);
   }
 
-  // Se os itens não forem especificados, retornará valores padrões
-  if (!itens || itens.length === 0) {
-    itens = ["street", "neighborhood", "city", "state"];
+  // Se os itens não forem especificados, usa os padrões
+  if (!itens || itens.trim() === "") {
+    itens = "street, neighborhood, city, state";
   }
 
-  // Retorna a resposta com os itens desejados
-  var resultado = itens.map(function(item) {
+  // Converte a string de itens em um array, removendo espaços extras
+  var itensArray = itens.split(",").map(function(item) {
+    return item.trim();
+  });
+
+  // Retorna os valores dos itens desejados
+  var resultado = itensArray.map(function(item) {
     if (item === "latitude") {
-      return data.location ? data.location.coordinates.latitude : "N/A";
+      return data.location && data.location.coordinates && data.location.coordinates.latitude 
+        ? data.location.coordinates.latitude 
+        : "N/A";
     } else if (item === "longitude") {
-      return data.location ? data.location.coordinates.longitude : "N/A";
+      return data.location && data.location.coordinates && data.location.coordinates.longitude 
+        ? data.location.coordinates.longitude 
+        : "N/A";
     } else {
-      return data[item] || 'N/A';
+      return data[item] || "N/A";
     }
   });
 
-  // Retorna os valores separados por vírgula
-  return resultado.join(', ');
+  return resultado.join(", ");
 }
