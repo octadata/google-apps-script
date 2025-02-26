@@ -6,6 +6,12 @@ A função `CONSULTAR_CEP` permite consultar informações sobre um CEP diretame
 
 ## Como Usar
 
+1. Copie todo o código do arquivo [script.gs](https://github.com/octadata/google-apps-script/blob/main/consultar_cep/script.gs)
+2. Na sua planilha Google, vá em Extensões > Apps Script
+3. Cole o código, salve e execute para conceder as permissões.
+
+Agora é só seguir as orientações abaixo e utilizar a nova função de consulta de CEP diretamente na sua planilha.
+
 ```excel
 =CONSULTAR_CEP(cep; itens)
 ```
